@@ -29,8 +29,7 @@ defmodule FiberFinder.FiberLinesProvider do
     |> where([z], z.name==^name and fragment("ST_DWithin(wkb_geometry :: GEOGRAPHY, ST_SetSRID(ST_MakePoint(?, ?), 4326), ?)",
      type(^longitude, :float), type(^latitude, :float), type(^distance, :float)))
     |> select([z], %{"id" => z.ogc_fid, "providerName" => "zayo", "name" => z.name,
-    "line" => fragment("'{\"type\": \"FeatureCollection\", \"features\": [{\"type\": \"Feature\", \"geometry\": ' || st_asgeojson(ST_Intersection(st_buffer(geography(ST_ClosestPoint(wkb_geometry, ST_SetSRID(ST_MakePoint(?, ?),4326))), ?),wkb_geometry)) || '}]}' AS line",
-     type(^longitude, :float), type(^latitude, :float), type(^distance, :float))})
+    "line" => fragment("'{\"type\": \"FeatureCollection\", \"features\": [{\"type\": \"Feature\", \"geometry\": ' || st_asgeojson(wkb_geometry) || '}]}' AS line")})
     |> Repo.all
 
     # |> where(fragment("ST_DWithin(wkb_geometry :: GEOGRAPHY, ST_SetSRID(ST_MakePoint(?, ?), 4326), ?)",
