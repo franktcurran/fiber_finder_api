@@ -13,6 +13,7 @@ defmodule FiberFinder.ZayoProvider do
     field :providerName, :string, virtual: true
     field :name, :string
     field :distance, :float, virtual: true
+    field :line, :string, virtual: true
   end
 
   @required_fields ~w(name, distance, longitude, latitude)
@@ -29,7 +30,8 @@ defmodule FiberFinder.ZayoProvider do
     |> where(fragment("ST_DWithin(wkb_geometry :: GEOGRAPHY, ST_SetSRID(ST_MakePoint(?, ?), 4326), ?)",
      type(^longitude, :float), type(^latitude, :float), type(^distance, :float)))
     |> select([z], %{"id" => z.ogc_fid, "providerName" => "zayo", "name" => z.name, "distance" => fragment("ST_Distance(wkb_geometry :: GEOGRAPHY, ST_SetSRID(ST_MakePoint(?, ?), 4326)) AS distance",
-     type(^longitude, :float), type(^latitude, :float))})
+     type(^longitude, :float), type(^latitude, :float)),
+     "line" => fragment("'{\"type\": \"FeatureCollection\", \"features\": [{\"type\": \"Feature\", \"geometry\": ' || st_asgeojson(wkb_geometry) || '}]}' AS line")})
     |> order_by(asc: fragment("distance"))
     |> Repo.all
   end
